@@ -3,6 +3,10 @@ using E_Commerce_Backend.Interfaces;
 using E_Commerce_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
+using MailKit.Net.Smtp;
+using MailKit.Security;
+
+
 namespace E_Commerce_Backend.Controllers
 {
     [ApiController]
@@ -62,23 +66,84 @@ namespace E_Commerce_Backend.Controllers
             }
         }
 
-        //POST: api/product
+        ////POST: api/product
+        //[HttpPost("register")]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(200, Type = typeof(User))]
+        //public async Task<IActionResult> RegisterUser([FromBody] UserDto userDto)
+        //{
+        //    try
+        //    {
+        //        await _userRepository.AddUser(userDto);
+        //        return Ok(userDto.UserName + " Crreate Successfully");
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        return StatusCode(500, "An error occurred while adding the user.");
+        //    }
+        //}
         [HttpPost("register")]
         [ProducesResponseType(400)]
-        [ProducesResponseType(200, Type = typeof(User))]
-        public async Task<IActionResult> RegisterUser([FromBody] UserDto userDto)
+        [ProducesResponseType(200, Type = typeof(UserDto))]
+        public async Task<IActionResult> RegisterUser([FromBody] UserDto userDto, [FromServices] SmtpClient smtpClient)
         {
             try
             {
+                // Generate a 4-digit validation code
+                string validationCode = GenerateValidationCode();
+
+                // Send the validation code to the user's email
+                bool isEmailSent = await SendValidationCode(userDto.Email, validationCode, smtpClient);
+
+                if (!isEmailSent)
+                {
+                    // Return an error if the email sending fails
+                    return StatusCode(500, "Failed to send the validation code to the user's email.");
+                }
+
+                // Continue with the user registration process
                 await _userRepository.AddUser(userDto);
-                return Ok(userDto.UserName + " Crreate Successfully");
+
+                return Ok(userDto.UserName + " created successfully");
             }
             catch (Exception)
             {
-
                 return StatusCode(500, "An error occurred while adding the user.");
             }
         }
+
+        private string GenerateValidationCode()
+        {
+            // Generate a 4-digit random validation code
+            Random random = new Random();
+            int validationCode = random.Next(1000, 9999);
+            return validationCode.ToString();
+        }
+
+        private async Task<bool> SendValidationCode(string email, string validationCode, SmtpClient smtpClient)
+        {
+            try
+            {
+                var message = new MimeKit.MimeMessage();
+                message.From.Add(new MimeKit.MailboxAddress("Your Name", "your-email@example.com"));
+                message.To.Add(new MimeKit.MailboxAddress("", email));
+                message.Subject = "Registration Validation Code";
+                message.Body = new MimeKit.TextPart("plain")
+                {
+                    Text = $"Your validation code is: {validationCode}"
+                };
+
+                await smtpClient.SendAsync(message);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
 
         //Upadete User
         [HttpPut("{userId}")]

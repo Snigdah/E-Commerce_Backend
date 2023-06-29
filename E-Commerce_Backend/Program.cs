@@ -3,6 +3,8 @@ using E_Commerce_Backend.Interfaces;
 using E_Commerce_Backend.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,19 @@ builder.Services.AddScoped<ICartItemRepository,CartItemRepository>();
 builder.Services.AddScoped<IReviewRepository,ReviewRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+builder.Services.AddTransient<SmtpClient>(serviceProvider =>
+{
+    var smtpClient = new SmtpClient();
+    // Configure the SmtpClient here (e.g., host, port, credentials, etc.)
+    // Replace the placeholders with your actual SMTP server details
+    smtpClient.Connect("smtp.example.com", 587, SecureSocketOptions.StartTls);
+    smtpClient.Authenticate("farhatsnigdho1392@gmail.com", "monirajahan1392");
+    return smtpClient;
+});
+
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DataContext>(options =>
