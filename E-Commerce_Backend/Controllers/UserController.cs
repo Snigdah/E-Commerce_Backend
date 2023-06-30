@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using MailKit.Net.Smtp;
 using MailKit.Security;
-
+using MimeKit;
 
 namespace E_Commerce_Backend.Controllers
 {
@@ -125,9 +125,9 @@ namespace E_Commerce_Backend.Controllers
         {
             try
             {
-                var message = new MimeKit.MimeMessage();
-                message.From.Add(new MimeKit.MailboxAddress("Your Name", "your-email@example.com"));
-                message.To.Add(new MimeKit.MailboxAddress("", email));
+                var message = new MimeMessage();
+                message.From.Add(MailboxAddress.Parse("marques.mcclure78@ethereal.email"));
+                message.To.Add(MailboxAddress.Parse(email));
                 message.Subject = "Registration Validation Code";
                 message.Body = new MimeKit.TextPart("plain")
                 {
@@ -135,6 +135,7 @@ namespace E_Commerce_Backend.Controllers
                 };
 
                 await smtpClient.SendAsync(message);
+                smtpClient.Disconnect(true);
 
                 return true;
             }

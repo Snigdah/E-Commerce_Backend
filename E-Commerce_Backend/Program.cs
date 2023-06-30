@@ -36,8 +36,8 @@ builder.Services.AddTransient<SmtpClient>(serviceProvider =>
     var smtpClient = new SmtpClient();
     // Configure the SmtpClient here (e.g., host, port, credentials, etc.)
     // Replace the placeholders with your actual SMTP server details
-    smtpClient.Connect("smtp.example.com", 587, SecureSocketOptions.StartTls);
-    smtpClient.Authenticate("farhatsnigdho1392@gmail.com", "monirajahan1392");
+    smtpClient.Connect("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
+    smtpClient.Authenticate("marques.mcclure78@ethereal.email", "WMq9t7k2uWATGGXxk2");
     return smtpClient;
 });
 
